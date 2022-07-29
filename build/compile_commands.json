@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build",
+  "command": "/usr/bin/gcc  -I/home/nakor/gitlab/dev-symposium-unix-persistence-elf/include -g -Wall -g -o CMakeFiles/parse_elf.dir/src/parse_elf.c.o -c /home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/parse_elf.c",
+  "file": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/parse_elf.c"
+},
+{
+  "directory": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build",
+  "command": "/usr/bin/gcc  -I/home/nakor/gitlab/dev-symposium-unix-persistence-elf/include -g -Wall -g -o CMakeFiles/parse_elf.dir/src/header_prints.c.o -c /home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/header_prints.c",
+  "file": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/header_prints.c"
+},
+{
+  "directory": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build",
+  "command": "/usr/bin/gcc  -I/home/nakor/gitlab/dev-symposium-unix-persistence-elf/include -g -Wall -g -o CMakeFiles/parse_elf.dir/src/linked_list.c.o -c /home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/linked_list.c",
+  "file": "/home/nakor/gitlab/dev-symposium-unix-persistence-elf/src/linked_list.c"
+}
+]

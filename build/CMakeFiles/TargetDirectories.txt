@@ -1,0 +1,3 @@
+/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build/CMakeFiles/parse_elf.dir
+/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build/CMakeFiles/edit_cache.dir
+/home/nakor/gitlab/dev-symposium-unix-persistence-elf/build/CMakeFiles/rebuild_cache.dir

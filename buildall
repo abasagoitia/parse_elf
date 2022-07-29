@@ -1,0 +1,6 @@
+cmake -S . -B build/
+cd build
+make
+
+#cd ../tests
+#make hello_world_test.c -o hello_world_test -pie
