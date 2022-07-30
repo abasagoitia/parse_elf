@@ -55,6 +55,10 @@ void print_EI_OSABI_64(Elf64_Ehdr *header);
 void print_EI_DATA_64(Elf64_Ehdr *header);
 void print_EI_CLASS_64(Elf64_Ehdr *header);
 
+void print_elf_program_header_64(Elf64_Phdr *phdr);
+void print_elf_all_program_headers_64(llist_t *llist);
+void print_elf_all_section_headers_64(llist_t *shdr_list, char *shdr_str);
+
 llist_t *llist_create(void *node);
 node_t *node_create(void *data);
 int llist_add_node(llist_t *llist, node_t *node);

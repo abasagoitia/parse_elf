@@ -1,5 +1,7 @@
 #include <dev_elf.h>
 #include <elf.h>
+#include <stdint.h>
+#include <unistd.h>
 
 int32_t args_open_elf(int argc, char **argv)
 {
@@ -202,6 +204,54 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
     return shdr_list;
 }
 
+char *get_elf_section_header_str(int fd, llist_t *shdr_list, uint16_t shstrndx)
+{
+    if (0 > fd || NULL == shdr_list)
+    {
+        printf("Error:\n\tfd: %d\n\tshdr: %p\n", fd, shdr_list);
+        return NULL;
+    }
+
+    int i = 0;
+    node_t *node = shdr_list->head;
+    while (i < shstrndx && NULL != node)
+    {
+        node = node->next;
+        i++;
+    }
+
+    if (i != shstrndx || node == NULL)
+    {
+        printf("Error: Could not get section\n");
+        return NULL;
+    }
+
+    Elf64_Shdr *shdr = node->data;
+
+    if (shdr->sh_offset != lseek(fd, shdr->sh_offset, SEEK_SET))
+    {
+        printf("Error: Failed to seek\n");
+        return NULL;
+    }
+
+    // Adding 1 for null byte
+    char *str = calloc(shdr->sh_size + 1, sizeof(char));
+    if (NULL == str)
+    {
+        printf("Error: Failed Alloc\n");
+        return NULL;
+    }
+
+    if (shdr->sh_size != read(fd, str, shdr->sh_size))
+    {
+        printf("Error: Failed Read\n");
+        free(str);
+        str = NULL;
+        return NULL;
+    }
+    return str;
+}
+
 int main(int argc, char **argv)
 {
     Elf64_Ehdr *header_64 = NULL;
@@ -234,12 +284,24 @@ int main(int argc, char **argv)
         return FAILURE;
     }
 
+    print_elf_all_program_headers_64(phdr_list_64);
+
     shdr_list_64 = get_elf_section_header_table_64(fd, header_64);
     if (NULL == shdr_list_64)
     {
         printf("Unable to get section header\n");
         return FAILURE;
     }
+
+    char *shdr_str = get_elf_section_header_str(fd, shdr_list_64, header_64->e_shstrndx);
+    if (NULL == shdr_str)
+    {
+        printf("Error: Failed to get shdr_str\n");
+        return FAILURE;
+    }
+
+
+    print_elf_all_section_headers_64(shdr_list_64, shdr_str);
     
 
 
