@@ -313,9 +313,9 @@ void print_p_type_64(Elf64_Phdr *phdr)
         case PT_GNU_EH_FRAME:
             printf("PT_GNU_EH_FRAME\n");
             break;
-        case PT_GNU_PROPERTY:
-            printf("PT_GNU_PROPERTY\n");
-            break;
+        // case PT_GNU_PROPERTY:
+        //     printf("PT_GNU_PROPERTY\n");
+        //     break;
         case PT_GNU_RELRO:
             printf("PT_GNU_RELRO\n");
             break;
