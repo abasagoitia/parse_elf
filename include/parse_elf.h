@@ -76,47 +76,6 @@ void print_EI_OSABI_64(Elf64_Ehdr *header);
 void print_EI_DATA_64(Elf64_Ehdr *header);
 void print_EI_CLASS_64(Elf64_Ehdr *header);
 
-/** 
-@brief: prints the individual members of a program header
-**/
-void print_p_type_64(Elf64_Phdr *phdr);
-void print_p_offset_64(Elf64_Phdr *phdr);
-void print_p_vaddr_64(Elf64_Phdr *phdr);
-void print_p_paddr_64(Elf64_Phdr *phdr);
-void print_p_filesz_64(Elf64_Phdr *phdr);
-void print_p_memsz_64(Elf64_Phdr *phdr);
-void print_p_flags_64(Elf64_Phdr *phdr);
-void print_p_align_64(Elf64_Phdr *phdr);
-
-/** 
-@brief: prints the individual members of a section header
-**/
-void print_sh_name_64(Elf64_Shdr *shdr, char *shdr_str);
-void print_sh_type_64(Elf64_Shdr *shdr);
-void print_sh_flags_64(Elf64_Shdr *shdr);
-void print_sh_addr_64(Elf64_Shdr *shdr);
-void print_sh_offset_64(Elf64_Shdr *shdr);
-void print_sh_size_64(Elf64_Shdr *shdr);
-void print_sh_link_64(Elf64_Shdr *shdr);
-void print_sh_info_64(Elf64_Shdr *shdr);
-void print_sh_addralign_64(Elf64_Shdr *shdr);
-void print_sh_entsize_64(Elf64_Shdr *shdr);
-
-/**
-@brief: Prints the information associated with the program and section headers
-from the ELF header
-**/
-void print_section_header_info_64(Elf64_Ehdr *header);
-void print_program_header_info_64(Elf64_Ehdr *header);
-
-/**
-@brief: Prints all information associated with each header type
-**/
-void print_elf_program_header_64(Elf64_Phdr *phdr);
-void print_elf_section_header_64(Elf64_Shdr *shdr, char * shdr_str);
-void print_elf_all_program_headers_64(llist_t *llist);
-void print_elf_all_section_headers_64(llist_t *shdr_list, char *shdr_str);
-
 /**
 @brief: Initializes a linked list
 @return: llist || NULL
@@ -168,38 +127,5 @@ int is_ELF64(Elf64_Ehdr *hdr64);
 **/
 Elf64_Ehdr *get_elf_header_64(int32_t fd);
 
-/**
-@brief: Parses the ELF program header table and saves those tables
-@param: fd - file descriptor of ELF file
-@param: elf_header - Elf64_Ehdr of file
-@return: llist_t - linked list of nodes containing program headers || NULL
-**/
-llist_t *get_elf_program_header_table_64(int32_t fd, Elf64_Ehdr *elf_header);
-
-/**
-@brief: Parses the ELF section header table and saves those tables
-@param: fd - file descriptor of ELF file
-@param: elf_header - Elf64_Ehdr of file
-@return: llist_t - linked list of nodes containing section headers || NULL
-**/
-llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header);
-
-/**
-@brief: Parses the ELF section header string
-@param: fd - file descriptor of ELF file
-@param: shdr_list - llist of section headers
-@param: shstrndx - uint16_t index of section header string (Found in Elf64_Ehdr)
-@return: char* - section header string
-**/
-char *get_elf_section_header_str_64(int fd, llist_t *shdr_list, uint16_t shstrndx);
-
-/**
-@brief: Parses the ELF .text section string
-@param: fd - file descriptor of ELF file
-@param: list_shdr - llist of section headers
-@param: write_file - if greater than 0 will create file (text_out) containing .text 
-@return: char* - section header string
-**/
-char *get_elf_text_section_64(int fd, char *shdr_str, llist_t *list_shdr, int write_file);
 
 #endif

@@ -27,6 +27,7 @@
 ## Important Information
 - Parse Elf currently only supports parsing ELF files on 64bit Linux. All ELF's analyzed using this program must be 64bit.
 - This is an incomplete project further work will be done to complete functionality.
+- Currently main is in src/parse_elf_api.c but will be moved in the future
 
 ## Usage:
 
@@ -135,3 +136,9 @@ readelf -a <some_ELF>
 - [ ] Parse Notes
 #### Edit
 - [ ] Add functionality to edit ELF's
+
+## Credits
+I used these resources for help in creating this program
+* https://github.com/statusfailed/elf-from-scratch/blob/master/main.py
+* https://github.com/TheCodeArtist/elf-parser/blob/master/elf-parser.c
+* https://linux.die.net/man/5/elf
