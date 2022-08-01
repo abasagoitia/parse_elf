@@ -3,41 +3,20 @@
 #include <stdint.h>
 #include <unistd.h>
 
-int32_t args_open_elf(int argc, char **argv)
-{
-    if (2 != argc)
-    {
-        printf("Usage: ./%s <elf_file_path>\n", argv[0]);
-        return FAILURE;
-    }
-
-    int32_t fd = open(argv[1], O_RDONLY);  
-    if (0 > fd)
-    {
-        printf("Unable to open: <%s>\n", argv[1]);
-        return FAILURE;
-    }
-
-    return fd;
-}
-
-void print_hex_buf(uint8_t *buf, int length)
-{
-    int i = 0;
-    while (i < length)
-        {
-            printf("%02x ", buf[i]);
-            i++;
-        }
-        printf("\n");
-}
 
 int is_ELF64(Elf64_Ehdr *hdr64)
 {
     if (0 != memcmp(hdr64->e_ident, "\x7f" "ELF", ELF_IDENT_LEN))
     {
         printf("Not an elf file got: \n\t");
-        print_hex_buf((uint8_t *) hdr64->e_ident, ELF_IDENT_LEN);
+        
+        int i = 0;
+            while (i < ELF_IDENT_LEN)
+            {
+                printf("%02x ", hdr64->e_ident[i]);
+                i++;
+            }
+        printf("\n");
      
         return FAILURE;
     }
@@ -158,7 +137,7 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
         return NULL;
     }
 
-    llist_t *shdr_list = malloc(sizeof(llist_t));
+    llist_t *shdr_list = llist_create();
     if (NULL == shdr_list)
     {
         printf("Cannot make list\n");
@@ -204,7 +183,7 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
     return shdr_list;
 }
 
-char *get_elf_section_header_str(int fd, llist_t *shdr_list, uint16_t shstrndx)
+char *get_elf_section_header_str_64(int fd, llist_t *shdr_list, uint16_t shstrndx)
 {
     if (0 > fd || NULL == shdr_list)
     {
@@ -234,8 +213,7 @@ char *get_elf_section_header_str(int fd, llist_t *shdr_list, uint16_t shstrndx)
         return NULL;
     }
 
-    // Adding 1 for null byte
-    char *str = calloc(shdr->sh_size + 1, sizeof(char));
+    char *str = calloc(shdr->sh_size, sizeof(char));
     if (NULL == str)
     {
         printf("Error: Failed Alloc\n");
@@ -252,15 +230,101 @@ char *get_elf_section_header_str(int fd, llist_t *shdr_list, uint16_t shstrndx)
     return str;
 }
 
+char *get_elf_text_section_64(int fd, char *shdr_str, llist_t *list_shdr, int write_file)
+{
+    if (0 > fd || NULL == shdr_str || NULL == list_shdr || NULL == list_shdr->head)
+    {
+        printf("Error:\n\tfd: %d\n\tshdr_str: %p\n\t\
+                                    list_shdr: %p\n\t\
+                                    list_shdr->head: %p\n", 
+                                    fd, shdr_str, list_shdr, list_shdr->head);
+        return NULL;
+    }
+
+    char *text = NULL;
+    node_t *node = list_shdr->head;
+    Elf64_Shdr *shdr = NULL;
+
+    while(NULL != node)
+    {
+         shdr = (Elf64_Shdr *) node->data;
+        if(0 == strncmp(".text", (shdr_str + shdr->sh_name), 6))
+        {
+            break;
+        }
+
+        node = node->next;
+    }
+
+    if (NULL == node)
+    {
+        printf("Unable to find .text\n");
+        return NULL;
+    }
+
+    if (shdr->sh_offset != lseek(fd, shdr->sh_offset, SEEK_SET))
+    {
+        printf("Error: Failed seek\n");
+        return NULL;
+    }
+
+    text = malloc(shdr->sh_size);
+    if (NULL == text)
+    {
+        printf("Error: text: %p\n", text);
+        return NULL;
+    }
+
+    if (shdr->sh_size != read(fd, text, shdr->sh_size))
+    {
+        printf("Error: Failed Read\n");
+        free(text);
+        text = NULL;
+        return NULL;
+    }
+
+    if (0 < write_file)
+    {
+        int out_fd = open("text_out", O_WRONLY | O_CREAT);
+        if (0 > out_fd)
+        {
+            printf("Error: Failed to open file\n");
+            free(text);
+            text = NULL;
+            return NULL;
+        }
+
+        if (shdr->sh_size != write(out_fd, text, shdr->sh_size))
+        {
+            printf("Error: Failed to write file\n");
+            free(text);
+            text = NULL;
+            return NULL;
+        }
+
+        fsync(out_fd);
+    }
+    return text;
+}
+
+
 int main(int argc, char **argv)
 {
     Elf64_Ehdr *header_64 = NULL;
     llist_t *phdr_list_64 = NULL;
     llist_t* shdr_list_64 = NULL;
+    char* text = NULL;
 
-    int32_t fd = args_open_elf(argc, argv);
-    if (FAILURE == fd)
+    if (2 != argc)
     {
+        printf("Usage: ./%s <elf_file_path>\n", argv[0]);
+        return FAILURE;
+    }
+
+    int32_t fd = open(argv[1], O_RDONLY);  
+    if (0 > fd)
+    {
+        printf("Unable to open: <%s>\n", argv[1]);
         return FAILURE;
     }
 
@@ -293,15 +357,16 @@ int main(int argc, char **argv)
         return FAILURE;
     }
 
-    char *shdr_str = get_elf_section_header_str(fd, shdr_list_64, header_64->e_shstrndx);
+    char *shdr_str = get_elf_section_header_str_64(fd, shdr_list_64, header_64->e_shstrndx);
     if (NULL == shdr_str)
     {
         printf("Error: Failed to get shdr_str\n");
         return FAILURE;
     }
 
-
     print_elf_all_section_headers_64(shdr_list_64, shdr_str);
+
+    text = get_elf_text_section_64(fd, shdr_str, shdr_list_64, 1);
     
 
 
@@ -322,6 +387,12 @@ exit:
     {
         free_llist(shdr_list_64, &free);
         shdr_list_64 = NULL;
+    }
+
+    if (text)
+    {
+        free(text);
+        text = NULL;
     }
     return SUCCESS;
 }

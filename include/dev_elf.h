@@ -59,7 +59,7 @@ void print_elf_program_header_64(Elf64_Phdr *phdr);
 void print_elf_all_program_headers_64(llist_t *llist);
 void print_elf_all_section_headers_64(llist_t *shdr_list, char *shdr_str);
 
-llist_t *llist_create(void *node);
+llist_t *llist_create();
 node_t *node_create(void *data);
 int llist_add_node(llist_t *llist, node_t *node);
 int llist_add_data(llist_t *llist, void *data);

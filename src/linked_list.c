@@ -1,7 +1,7 @@
 #include <dev_elf.h>
 
 
-llist_t *llist_create(void *node)
+llist_t *llist_create()
 {
     llist_t *llist = malloc(sizeof(llist_t));
     if (NULL == llist)
