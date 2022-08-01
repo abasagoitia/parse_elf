@@ -1,8 +1,7 @@
-#include <dev_elf.h>
+#include <parse_elf.h>
 #include <elf.h>
 #include <stdint.h>
 #include <unistd.h>
-
 
 int is_ELF64(Elf64_Ehdr *hdr64)
 {
@@ -28,35 +27,22 @@ Elf64_Ehdr *get_elf_header_64(int32_t fd)
 {
     if (0 > fd)
     {
-        printf("Invalid fd\n");
+        printf("Error: fd: %d\n", fd);
     }
 
     // There is only one ELF header
     Elf64_Ehdr *hdr64 = calloc(1, sizeof(Elf64_Ehdr));
     if (NULL == hdr64)
     {
-        printf("Unable to alloc memory\n");
+        printf("Error: hdr64: %p\n", hdr64);
         return NULL;
     }
 
-    size_t bytes_read = read(fd, hdr64, sizeof(Elf64_Ehdr));
-
-    off_t offset = 0;
-
-    if (offset != lseek(fd, offset, SEEK_SET))
+    if (sizeof(Elf64_Ehdr) != read(fd, hdr64, sizeof(Elf64_Ehdr)))
     {
-        printf("Unable to set fp back to start of file\n");
+        printf("Error: Unable to read ELF 64 Header\n");
         free(hdr64);
         hdr64 = NULL;
-        return NULL;
-    }
-
-    if (bytes_read != sizeof(Elf64_Ehdr))
-    {
-        printf("Unable to read ELF 64 Header\n");
-        free(hdr64);
-        hdr64 = NULL;
-
         return NULL;
     }
 
@@ -67,20 +53,20 @@ llist_t *get_elf_program_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
 {
     if (0 > fd || NULL == elf_header)
     {
-        printf("Invalid Inputs:\n\tfd: %d\n\telf_header: %p\n", fd, elf_header);
+        printf("Error:\n\tfd: %d\n\telf_header: %p\n", fd, elf_header);
         return NULL;
     }
     
     if (0 == elf_header->e_phnum)
     {
-        printf("There are not any entries in the program header table\n");
+        printf("Error: There are not any entries in the program header table\n");
         return NULL;
     }
 
-    llist_t *phdr_list = malloc(sizeof(llist_t));
+    llist_t *phdr_list = llist_create();
     if (NULL == phdr_list)
     {
-        printf("Cannot make list\n");
+        printf("Error: %p\n", phdr_list);
         return NULL;
     }
 
@@ -88,6 +74,7 @@ llist_t *get_elf_program_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
     if (offset != lseek(fd, offset, SEEK_SET))
     {
         printf("Cannot seek set\n");
+        free_llist(phdr_list, &free);
         return NULL;
     }
 
@@ -96,26 +83,30 @@ llist_t *get_elf_program_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
         Elf64_Phdr *phdr = malloc(sizeof(Elf64_Phdr));
         if (NULL == phdr)
         {
-            printf("Failed to alloc\n");
+            printf("Error: phdr: %p\n", phdr);
+            free_llist(phdr_list, &free);
             return NULL;
         }
 
         if (elf_header->e_phentsize != read(fd, phdr, elf_header->e_phentsize))
         {
-            printf("Failed read\n");
+            printf("Error: Failed read\n");
+            free_llist(phdr_list, &free);
             return NULL;
         }
 
         if (FAILURE == llist_add_data(phdr_list, phdr))
         {
-            printf("Failed to add phdr to list\n");
+            printf("Error: Failed to add phdr to list\n");
+            free_llist(phdr_list, &free);
             return NULL;
         }
 
         offset += (i * elf_header->e_phentsize);
         if (offset != lseek(fd, offset, SEEK_SET))
         {
-            printf("Cannot seek set\n");
+            printf("Error: Cannot seek set\n");
+            free_llist(phdr_list, &free);
             return NULL;
         }
     }
@@ -127,20 +118,20 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
 {
     if (0 > fd || NULL == elf_header)
     {
-        printf("Invalid Inputs:\n\tfd: %d\n\telf_header: %p\n", fd, elf_header);
+        printf("Error:\n\tfd: %d\n\telf_header: %p\n", fd, elf_header);
         return NULL;
     }
     
     if (0 == elf_header->e_shnum)
     {
-        printf("There are not any entries in the program header table\n");
+        printf("Error: There are not any entries in the program header table\n");
         return NULL;
     }
 
     llist_t *shdr_list = llist_create();
     if (NULL == shdr_list)
     {
-        printf("Cannot make list\n");
+        printf("Error: Cannot make list\n");
         return NULL;
     }
 
@@ -148,6 +139,7 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
     if (offset != lseek(fd, offset, SEEK_SET))
     {
         printf("Cannot seek set\n");
+        free_llist(shdr_list, &free);
         return NULL;
     }
 
@@ -156,26 +148,30 @@ llist_t *get_elf_section_header_table_64(int32_t fd, Elf64_Ehdr *elf_header)
         Elf64_Shdr *shdr = malloc(elf_header->e_shentsize);
         if (NULL == shdr)
         {
-            printf("Failed to alloc\n");
+            printf("Error: shdr: %p\n", shdr);
+            free_llist(shdr_list, &free);
             return NULL;
         }
 
         if (elf_header->e_shentsize != read(fd, shdr, elf_header->e_shentsize))
         {
-            printf("Failed read\n");
+            printf("Error: Failed read\n");
+            free_llist(shdr_list, &free);
             return NULL;
         }
 
         if (FAILURE == llist_add_data(shdr_list, shdr))
         {
-            printf("Failed to add shdr to list\n");
+            printf("Error: Failed to add shdr to list\n");
+            free_llist(shdr_list, &free);
             return NULL;
         }
 
         offset += elf_header->e_shentsize;
         if (offset != lseek(fd, offset, SEEK_SET))
         {
-            printf("Cannot seek set\n");
+            printf("Error: Cannot seek set\n");
+            free_llist(shdr_list, &free);
             return NULL;
         }
     }
@@ -206,7 +202,6 @@ char *get_elf_section_header_str_64(int fd, llist_t *shdr_list, uint16_t shstrnd
     }
 
     Elf64_Shdr *shdr = node->data;
-
     if (shdr->sh_offset != lseek(fd, shdr->sh_offset, SEEK_SET))
     {
         printf("Error: Failed to seek\n");
@@ -247,12 +242,11 @@ char *get_elf_text_section_64(int fd, char *shdr_str, llist_t *list_shdr, int wr
 
     while(NULL != node)
     {
-         shdr = (Elf64_Shdr *) node->data;
-        if(0 == strncmp(".text", (shdr_str + shdr->sh_name), 6))
+        shdr = (Elf64_Shdr *) node->data;
+        if(0 == strncmp(TEXT_SECTION, (shdr_str + shdr->sh_name), TEXT_SECTION_LEN))
         {
             break;
         }
-
         node = node->next;
     }
 
@@ -285,7 +279,7 @@ char *get_elf_text_section_64(int fd, char *shdr_str, llist_t *list_shdr, int wr
 
     if (0 < write_file)
     {
-        int out_fd = open("text_out", O_WRONLY | O_CREAT);
+        int out_fd = open(TEXT_FILE, O_WRONLY | O_CREAT);
         if (0 > out_fd)
         {
             printf("Error: Failed to open file\n");
@@ -301,7 +295,6 @@ char *get_elf_text_section_64(int fd, char *shdr_str, llist_t *list_shdr, int wr
             text = NULL;
             return NULL;
         }
-
         fsync(out_fd);
     }
     return text;

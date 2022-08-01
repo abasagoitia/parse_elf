@@ -7,23 +7,23 @@ project(
     LANGUAGES C
 )
 
-set(HEADER_FILES include/dev_elf.h)
+set(HEADER_FILES include/parse_elf.h)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
 add_executable(
-    parse_elf 
-        src/parse_elf.c
-        src/header_prints.c
+    parse_elf_api
+        src/parse_elf_api.c
+        src/parse_elf_prints.c
         src/linked_list.c
         ${HEADER_FILES})
 
 target_include_directories(
-    parse_elf 
+    parse_elf_api
         PRIVATE 
             include
 )
 
-target_compile_options(parse_elf PUBLIC 
+target_compile_options(parse_elf_api PUBLIC 
 "-Wall"
 "-g"
 )

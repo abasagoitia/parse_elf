@@ -1,6 +1,4 @@
-#include <dev_elf.h>
-#include <elf.h>
-#include <stdio.h>
+#include <parse_elf.h>
 
 void print_EI_CLASS_64(Elf64_Ehdr *header)
 {
@@ -524,7 +522,7 @@ void print_sh_entsize_64(Elf64_Shdr *shdr)
     printf("shdr->sh_entsize:\t%ld\n", shdr->sh_entsize);
 }
 
-void print_section_header_64(Elf64_Shdr *shdr, char * shdr_str)
+void print_elf_section_header_64(Elf64_Shdr *shdr, char * shdr_str)
 {
     printf("\nSection Header:\n");
     print_sh_name_64(shdr, shdr_str);
@@ -545,7 +543,7 @@ void print_elf_all_section_headers_64(llist_t *shdr_list, char* shdr_str)
 
     while (NULL != node)
     {
-        print_section_header_64((Elf64_Shdr *) node->data, shdr_str);
+        print_elf_section_header_64((Elf64_Shdr *) node->data, shdr_str);
         node = node->next;
     }
 }
