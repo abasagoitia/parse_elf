@@ -337,7 +337,7 @@ int main(int argc, char **argv)
     phdr_list_64 = get_elf_program_header_table_64(fd, header_64);
     if (NULL == phdr_list_64)
     {
-        printf("Unable to get program header\n");
+        printf("Error: Unable to get program header\n");
         return FAILURE;
     }
 
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
     shdr_list_64 = get_elf_section_header_table_64(fd, header_64);
     if (NULL == shdr_list_64)
     {
-        printf("Unable to get section header\n");
+        printf("Error: Unable to get section header\n");
         return FAILURE;
     }
 
