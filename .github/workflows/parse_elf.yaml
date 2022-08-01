@@ -27,6 +27,7 @@ jobs:
       - name: Run build project
         run: ./buildall
   run:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Run parse_elf
