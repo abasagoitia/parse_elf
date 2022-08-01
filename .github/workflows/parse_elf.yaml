@@ -27,7 +27,7 @@ jobs:
       - name: Run build project
         run: ./buildall
   run:
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v3
